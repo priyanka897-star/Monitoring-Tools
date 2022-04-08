@@ -1,0 +1,314 @@
+#follow this blog carefully
+https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elk-stack-on-ubuntu-14-04
+
+https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
+https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_architecture.html
+https://docs.aws.amazon.com/sns/latest/dg/welcome.html
+
+/home/ubuntu#  apt-get update
+
+
+/home/ubuntu# wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+OK
+/home/ubuntu# wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch |  apt-key add -
+OK
+/home/ubuntu# echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" |  tee -a /etc/apt/sources.list.d/elasticsearch-2.x.list
+/home/ubuntu# apt-get update
+/home/ubuntu# apt -y install elasticsearch
+/home/ubuntu# systemctl start elasticsearch
+:/home/ubuntu# systemctl status elasticsearch
+
+/home/ubuntu# update-rc.d elasticsearch defaults 95 10
+/home/ubuntu# echo "deb http://packages.elastic.co/kibana/4.5/debian stable main" |  tee -a /etc/apt/sources.list.d/kibana-4.5.x.list
+/home/ubuntu# apt-get update
+
+/home/ubuntu# apt-get -y install kibana
+
+/home/ubuntu# systemctl start kibana
+/home/ubuntu# systemctl status kibana
+
+/home/ubuntu# apt-get install nginx apache2-utils
+/home/ubuntu# htpasswd -c /etc/nginx/htpasswd.users kibanaadmin
+New password:type password here
+Re-type new password:retype password here
+Adding password for user kibanaadmin
+/home/ubuntu# htpasswd -c /etc/nginx/htpasswd.users kibanaadmin
+New password:
+Re-type new password:
+Adding password for user kibanaadmin
+/home/ubuntu# nano /etc/nginx/sites-available/default
+/home/ubuntu# nano /etc/nginx/sites-available/default
+/home/ubuntu# systemctl start nginx
+/home/ubuntu# systemctl status nginx
+/home/ubuntu# echo 'deb http://packages.elastic.co/logstash/2.2/debian stable main' |  tee /etc/apt/sources.list.d/logstash-2.2.x.list
+deb http://packages.elastic.co/logstash/2.2/debian stable main
+/home/ubuntu# apt-get update
+/home/ubuntu# apt-get install logstash
+
+/home/ubuntu# systemctl status logstach
+
+/home/ubuntu# mkdir -p /etc/pki/tls/certs
+/home/ubuntu# mkdir /etc/pki/tls/private
+/home/ubuntu# nano  /etc/ssl/openssl.cnf
+/home/ubuntu# cd /etc/pki/tls
+/etc/pki/tls# openssl req -config /etc/ssl/openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt
+/etc/pki/tls# client_loop: send disconnect: Connection reset
+/home/ubuntu# nano /etc/logstash/conf.d/02-beats-input.conf
+/home/ubuntu# nano /etc/logstash/conf.d/10-syslog-filter.conf
+/home/ubuntu# nano /etc/logstash/conf.d/30-elasticsearch-output.conf
+/home/ubuntu# service logstash configtest
+
+/home/ubuntu# nano /etc/logstash/conf.d/02-beats-input.conf
+/home/ubuntu# nano /etc/logstash/conf.d/10-syslog-filter.conf
+/home/ubuntu# service logstash configtest
+Configuration OK
+/home/ubuntu# systemctl enable logstach
+Failed to execute operation: No such file or directory
+/home/ubuntu# service logstash restart
+
+/home/ubuntu# service logstash status
+
+/home/ubuntu# update-rc.d logstash defaults 96 9
+/home/ubuntu# cd ~
+~# curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.1.0.zip
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  890k  100  890k    0     0   786k      0  0:00:01  0:00:01 --:--:--  786k
+~# apt-get -y install unzip
+~# unzip beats-dashboards-*.zip
+
+~/beats-dashboards-1.1.0# ./load.sh
+
+
+~/beats-dashboards-1.1.0# cd ~
+~# curl -O https://gist.githubusercontent.com/thisismitch/3429023e8438cc25b86c/raw/d8c479e2a1adcea8b1fe86570e42abab0f10f364/filebeat-index-template.json
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   991  100   991    0     0   2473      0 --:--:-- --:--:-- --:--:--  2477
+~# curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-template.json
+{
+  "acknowledged" : true
+}
+
+~# nano mykey.pem
+
+~# nano privatekey.pem
+
+:~$ ls
+~$ nano privatekey.pem
+~$ sudo su
+~$ ls
+privatekey.pem
+~$ chmod 400 privatekey.pem
+:~$ scp -i  /home/ubuntu/privatekey.pem -r  /etc/pki/tls/certs/logstash-forwarder.crt ubuntu@clientserverprivateip:/home/ubuntu
+logstash-forwarder.crt                                                                                            100% 1249     1.2KB/s   00:00
+~$ scp -i  /home/root/privatekey.pem -r  /etc/pki/tls/certs/logstash-forwarder.crt ubuntu@clientserverprivateip:/home/ubuntu
+
+~$ sudo nano /etc/nginx/sites-available/default
+
+~$ cd  /etc/nginx/sites-available/
+/etc/nginx/sites-available$ systemctl restart nginx
+
+/etc/nginx/sites-available$ sudo systemctl restart nginx
+
+/etc/nginx/sites-available$ sudo systemctl status nginx
+
+/home/ubuntu# service logstach status
+
+
+~$ sudo su
+
+/home/ubuntu# cd /etc/nginx/sites-availables/
+
+/home/ubuntu# cd /etc/nginx/sites-available/
+/etc/nginx/sites-available# ls
+default
+/etc/nginx/sites-available# nano default
+/etc/nginx/sites-available# systemctl restart nginx
+/etc/nginx/sites-available# systemctl status nginx
+/etc/nginx/sites-available# systemctl status kibana
+
+
+
+~$ sudo service logstash configtest
+
+Configuration OK
+~$ sudo su
+/home/ubuntu# service logstach configtest
+logstach: unrecognized service
+/home/ubuntu# service logstash configtest
+Configuration OK
+/home/ubuntu# service logstash restart
+/home/ubuntu# service logstash status
+
+/home/ubuntu# curl -XGET 'http://localhost:9200/filebeat-*/_search?pretty'
+
+/home/ubuntu#
+
+
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ sudo service filebeat restart
+~$ sudo update-rc.d filebeat defaults 95 10
+~$ sudo service filebeat status
+
+
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ sudo service filebeat restart
+~$ sudo service filebeat status
+●
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ sudo service filebeat restart
+~$ sudo service filebeat status
+.
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ sudo service filebeat restart
+~$ sudo service filebeat status
+
+~$ sudo update-rc.d filebeat defaults 95 10
+~$ sudo nano /etc/filebeat/filebeat.yml
+~$ curl -XGET 'http://localhost:9200/filebeat-*/_search?pretty'
+
+~$ sudo su
+/home/ubuntu#  curl -XGET 'http://localhost:9200/filebeat-*/_search?pretty'
+
+
+~$ sudo su
+/home/ubuntu# service filebeat restart
+/home/ubuntu# service filebeat status
+
+/home/ubuntu#  update-rc.d filebeat defaults 95 10
+
+    42  mkdir -p /etc/pki/tls/certs
+   43  cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/
+   44  cp /home/ubuntu/logstash-forwarder.crt /etc/pki/tls/certs/
+   45  cd /etc/pki/tls/certs/
+   46  ls
+   47  exit
+   48  history
+/home/ubuntu#
+
+mykey.pem  privatekey.pem
+~$ ls
+logstash-forwarder.crt  mykey.pem  privatekey.pem
+~$ cp /home/ubuntu/logstash-forwarder.crt /etc/pki/tls/certs/
+
+~$  sudo cp /home/ubuntu/logstash-forwarder.crt  /etc/pki/tls/certs/
+~$ cd  /etc/pki/tls/certs/
+/etc/pki/tls/certs$ ls
+logstash-forwarder.crt
+
+~$ wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+OK
+~$ sudo apt-get update
+
+~$ sudo service filebeat restart
+~$ sudo service filebeat status
+
+~$ sudo update-rc.d filebeat defaults 95 10
+ls
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
